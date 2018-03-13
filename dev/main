@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 04/18/2016 Aaron Caffrey https://github.com/wifiextender
+# Copyright 04/18/2016 https://github.com/wifiextender
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,15 +22,19 @@
 # utilizing all of the CPU cores
 
 _minify_html() {
-    mkdir -p --mode=700 '/tmp/myblog'
-    hljsTheme=$(cat ./temp/highlight.js-master/src/styles/agate.css \
-        /tmp/cyborg.css \
-        | ./temp/cleancss --s0)
+    theme=$(cat ./temp/highlight.js-master/src/styles/agate.css \
+      /tmp/cyborg.css | ./temp/cleancss -O0)
+    hljsTheme=$(echo ${theme} | perl -Mstrict -Mwarnings -pe 's|\n| |g')
 
-    ./temp/html-minifier --minify-js --minify-css --remove-comments \
-        --collapse-whitespace 'src/view/index-dev.html' | \
-            sed -e "s|@hljs-cyborg-badass@|<style>${hljsTheme}</style>|g" \
-                > ../index.html
+    # before the python usage:
+    # sed -e "s|@hljs-cyborg-badass@|<style>${hljsTheme}</style>|g" \
+
+    ./temp/html-minifier --minify-js --minify-css --remove-comments --collapse-whitespace 'src/view/index-dev.html' > /tmp/cleanHTML
+      python2 -c \
+          "with open('/tmp/cleanHTML','rt') as a: b=a.read().replace('@hljs-cyborg-badass@','<style>$hljsTheme</style>');print('{0}'.format(b))" \
+              > ../index.html
+
+    perl -Mstrict -Mwarnings -pi -e 's|\n| |g' ../index.html
 }
 
 _wget_hairyball() {
@@ -122,6 +126,16 @@ build() {
 clean() {
     make -j3 clean
 }
+
+#minImg() {
+    #find file -type f -name "*.jpg" -o -name "*.png" | {
+        #while read x
+        #do
+            #mkdir --parents --mode=700 g/"${x%/*}"
+            #node_modules/.bin/imagemin "${x}" > g/"${x}"
+        #done
+    #}
+#}
 
 main() {
     declare -a _targets
