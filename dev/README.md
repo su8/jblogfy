@@ -4,19 +4,19 @@ In order to build highlightjs you must use **node** version above than 0.12.6
 
 You can add more bash keywords that will be highlighted, add them in the **main** script.
 
-Don't run the **main** script manually, use the following commands instead:
-
 ```bash
 npm install
-npm run setup
-npm run build
+chmod +x main
+./main 'setup'
+./main 'build'
 
 # Only for Development purpose
 
 # Automatically rebuild jblogfy and
 # refresh the webserver
-# http://localhost:8000/index-dev.html
-npm run devel
+# http://localhost:8000/index.html
+node_modules/.bin/watch './main build' src &
+http-server .. -c5 -p 8000
 
 # The above command will run in infinite loop.
 ```
